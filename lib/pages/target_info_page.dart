@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:nexstep/components/button.dart';
 import 'package:nexstep/components/text_field.dart';
+import 'package:nexstep/supabase.dart';
 import 'package:nexstep/theme/main_theme.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class TargetInfoPage extends StatefulWidget {
   const TargetInfoPage({super.key});
@@ -19,9 +21,69 @@ class _TargetInfoPageState extends State<TargetInfoPage> {
 
   String? _selectedGender;
   String? _selectedWorkoutLevel;
+  bool _isSaving = false;
 
   final List<String> _genders = ['Male', 'Female', 'Other'];
   final List<String> _workoutLevels = ['Beginner', 'Intermediate', 'Advanced'];
+
+  Future<void> _saveTargetInfo() async {
+    final age = int.tryParse(_ageController.text);
+    final weight = double.tryParse(_weightController.text);
+    final targetWeight = double.tryParse(_targetWeightController.text);
+    final height = double.tryParse(_heightController.text);
+    final targetHeight = double.tryParse(_targetHeightController.text);
+
+    if (age == null ||
+        weight == null ||
+        targetWeight == null ||
+        height == null ||
+        targetHeight == null ||
+        _selectedGender == null ||
+        _selectedWorkoutLevel == null) {
+      _showMessage('Please fill in all fields correctly.');
+      return;
+    }
+
+    final user = supabase.auth.currentUser;
+    if (user == null) {
+      _showMessage('You must be logged in to continue.');
+      return;
+    }
+
+    setState(() => _isSaving = true);
+
+    try {
+      await supabase.from('details').insert({
+        'user_id': user.id,
+        'age': age,
+        'gender': _selectedGender,
+        'weight': weight,
+        'target_weight': targetWeight,
+        'height': height,
+        'target_height': targetHeight,
+        'workout_level': _selectedWorkoutLevel,
+      });
+
+      _showMessage('Target info saved successfully!');
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        '/dashboard',
+        (Route<dynamic> route) => false,
+      );
+    } on PostgrestException catch (e) {
+      _showMessage(e.message);
+    } catch (e) {
+      _showMessage('Unexpected error: $e');
+    } finally {
+      setState(() => _isSaving = false);
+    }
+  }
+
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -123,13 +185,9 @@ class _TargetInfoPageState extends State<TargetInfoPage> {
 
                 // Signup Button
                 NexStepButton(
-                  text: 'Signup',
-                  onPressed: () {
-                    Navigator.pushNamedAndRemoveUntil(
-                      context,
-                      '/dashboard',
-                      (Route<dynamic> route) => false,
-                    );
+                  text: _isSaving ? 'Saving...' : 'Signup',
+                  onPressed: () async {
+                    if (!_isSaving) await _saveTargetInfo();
                   },
                 ),
               ],

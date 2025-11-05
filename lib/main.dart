@@ -4,9 +4,13 @@ import 'package:nexstep/pages/login_page.dart';
 import 'package:nexstep/pages/signup_page.dart';
 import 'package:nexstep/pages/target_info_page.dart';
 import 'package:nexstep/pages/welcome_page.dart';
+import 'package:nexstep/supabase.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'theme/main_theme.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await initSupabase();
   runApp(const MyApp());
 }
 
@@ -30,3 +34,5 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+
+final supabase = Supabase.instance.client;
