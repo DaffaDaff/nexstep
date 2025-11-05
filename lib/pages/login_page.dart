@@ -75,7 +75,7 @@ class _LoginPageState extends State<LoginPage> {
                     onPressed: () {
                       Navigator.pushNamedAndRemoveUntil(
                         context,
-                        '/dashboard',
+                        '/main-nav',
                         (Route<dynamic> route) => false,
                       );
                     },

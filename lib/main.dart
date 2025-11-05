@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:nexstep/pages/dashboard_page.dart';
 import 'package:nexstep/pages/login_page.dart';
+import 'package:nexstep/pages/main_navigation.dart';
 import 'package:nexstep/pages/signup_page.dart';
 import 'package:nexstep/pages/target_info_page.dart';
+import 'package:nexstep/pages/training_plans_page.dart';
 import 'package:nexstep/pages/welcome_page.dart';
 import 'package:nexstep/supabase.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -30,6 +32,8 @@ class MyApp extends StatelessWidget {
         '/signup': (context) => const SignupPage(),
         '/target-info': (context) => const TargetInfoPage(),
         '/dashboard': (context) => const DashboardPage(),
+        '/training-plans': (context) => const TrainingPlansPage(),
+        '/main-nav': (context) => const MainNavigation(),
       },
     );
   }
