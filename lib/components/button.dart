@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:nexstep/theme/main_theme.dart';
 
-class CustomElevatedButton extends StatelessWidget {
+class NexStepButton extends StatelessWidget {
   final String text;
   final VoidCallback onPressed;
   final bool isFullWidth;
   final double? height;
 
-  const CustomElevatedButton({
+  const NexStepButton({
     super.key,
     required this.text,
     required this.onPressed,

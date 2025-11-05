@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:nexstep/components/button.dart';
 import 'package:nexstep/theme/main_theme.dart';
-import 'login_page.dart';
 
 class WelcomePage extends StatelessWidget {
   const WelcomePage({super.key});
@@ -33,7 +32,7 @@ class WelcomePage extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 height: 50,
-                child: CustomElevatedButton(
+                child: NexStepButton(
                   text: 'Get Started',
                   onPressed: () {
                     Navigator.pushNamed(context, '/login');

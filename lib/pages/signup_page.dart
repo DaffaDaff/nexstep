@@ -3,15 +3,22 @@ import 'package:nexstep/components/button.dart';
 import 'package:nexstep/components/text_field.dart';
 import 'package:nexstep/theme/main_theme.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class SignupPage extends StatefulWidget {
+  const SignupPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<SignupPage> createState() => _SignupPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _SignupPageState extends State<SignupPage> {
   bool _obscurePassword = true;
+  bool _obscureRepeatPassword = true;
+
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _repeatPasswordController =
+      TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +34,7 @@ class _LoginPageState extends State<LoginPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  "Login",
+                  "Signup",
                   style: theme.textTheme.titleLarge?.copyWith(
                     fontSize: 28,
                     fontWeight: FontWeight.w600,
@@ -35,13 +42,21 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 const SizedBox(height: 40),
 
+                // Username
+                NextStepTextField(
+                  hintText: 'Username',
+                  prefixIcon: Icons.person_outline,
+                  controller: _usernameController,
+                ),
+                const SizedBox(height: 20),
+
                 // Email
-                const NextStepTextField(
+                NextStepTextField(
                   hintText: 'Email',
                   prefixIcon: Icons.email_outlined,
+                  controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                 ),
-
                 const SizedBox(height: 20),
 
                 // Password
@@ -49,6 +64,7 @@ class _LoginPageState extends State<LoginPage> {
                   hintText: 'Password',
                   prefixIcon: Icons.lock_outline,
                   obscureText: _obscurePassword,
+                  controller: _passwordController,
                   suffixIcon: IconButton(
                     icon: Icon(
                       _obscurePassword
@@ -63,44 +79,57 @@ class _LoginPageState extends State<LoginPage> {
                     },
                   ),
                 ),
+                const SizedBox(height: 20),
 
-                const SizedBox(height: 30),
-
-                // Login Button
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: NexStepButton(
-                    text: 'Get Started',
+                // Repeat Password
+                NextStepTextField(
+                  hintText: 'Repeat Password',
+                  prefixIcon: Icons.lock_outline,
+                  obscureText: _obscureRepeatPassword,
+                  controller: _repeatPasswordController,
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscureRepeatPassword
+                          ? Icons.visibility_off_outlined
+                          : Icons.visibility_outlined,
+                      color: Colors.white54,
+                    ),
                     onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const LoginPage(),
-                        ),
-                      );
+                      setState(() {
+                        _obscureRepeatPassword = !_obscureRepeatPassword;
+                      });
                     },
                   ),
                 ),
 
+                const SizedBox(height: 30),
+
+                // Next Button
+                NexStepButton(
+                  text: 'Next',
+                  onPressed: () {
+                    // Navigate to target info screen
+                    Navigator.pushNamed(context, '/target-info');
+                  },
+                ),
+
                 const SizedBox(height: 20),
 
-                // Signup Text
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      "Don't have an account? ",
+                      "Have an Account? ",
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: Colors.white70,
                       ),
                     ),
                     GestureDetector(
                       onTap: () {
-                        Navigator.pushNamed(context, '/signup');
+                        Navigator.pushNamed(context, '/login');
                       },
                       child: Text(
-                        "Signup",
+                        "Login",
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: MainTheme.primaryColor,
                           fontWeight: FontWeight.w600,
