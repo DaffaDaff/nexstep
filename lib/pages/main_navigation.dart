@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:nexstep/pages/dashboard_page.dart';
+import 'package:nexstep/pages/profile_page.dart';
 import 'package:nexstep/pages/training_plans_page.dart';
 import 'package:nexstep/theme/main_theme.dart';
 
@@ -16,7 +17,7 @@ class _MainNavigationState extends State<MainNavigation> {
   final List<Widget> _pages = const [
     DashboardPage(),
     TrainingPlansPage(),
-    _ProfilePlaceholder(),
+    SensorsPage(),
   ];
 
   void _onNavTapped(int index) {
@@ -49,24 +50,6 @@ class _MainNavigationState extends State<MainNavigation> {
             label: 'Profile',
           ),
         ],
-      ),
-    );
-  }
-}
-
-// Simple placeholder until you build a Profile page
-class _ProfilePlaceholder extends StatelessWidget {
-  const _ProfilePlaceholder();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: MainTheme.backgroundColor,
-      body: const Center(
-        child: Text(
-          "Profile Page (Coming Soon)",
-          style: TextStyle(color: Colors.white70, fontSize: 16),
-        ),
       ),
     );
   }

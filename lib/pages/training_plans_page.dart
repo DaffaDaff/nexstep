@@ -9,12 +9,6 @@ class TrainingPlansPage extends StatefulWidget {
 }
 
 class _TrainingPlansPageState extends State<TrainingPlansPage> {
-  int _selectedIndex = 1;
-
-  void _onNavTapped(int index) {
-    setState(() => _selectedIndex = index);
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
