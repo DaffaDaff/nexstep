@@ -43,7 +43,7 @@ class _SignupPageState extends State<SignupPage> {
                 const SizedBox(height: 40),
 
                 // Username
-                NextStepTextField(
+                NexStepTextField(
                   hintText: 'Username',
                   prefixIcon: Icons.person_outline,
                   controller: _usernameController,
@@ -51,7 +51,7 @@ class _SignupPageState extends State<SignupPage> {
                 const SizedBox(height: 20),
 
                 // Email
-                NextStepTextField(
+                NexStepTextField(
                   hintText: 'Email',
                   prefixIcon: Icons.email_outlined,
                   controller: _emailController,
@@ -60,7 +60,7 @@ class _SignupPageState extends State<SignupPage> {
                 const SizedBox(height: 20),
 
                 // Password
-                NextStepTextField(
+                NexStepTextField(
                   hintText: 'Password',
                   prefixIcon: Icons.lock_outline,
                   obscureText: _obscurePassword,
@@ -82,7 +82,7 @@ class _SignupPageState extends State<SignupPage> {
                 const SizedBox(height: 20),
 
                 // Repeat Password
-                NextStepTextField(
+                NexStepTextField(
                   hintText: 'Repeat Password',
                   prefixIcon: Icons.lock_outline,
                   obscureText: _obscureRepeatPassword,

@@ -36,7 +36,7 @@ class _LoginPageState extends State<LoginPage> {
                 const SizedBox(height: 40),
 
                 // Email
-                const NextStepTextField(
+                const NexStepTextField(
                   hintText: 'Email',
                   prefixIcon: Icons.email_outlined,
                   keyboardType: TextInputType.emailAddress,
@@ -45,7 +45,7 @@ class _LoginPageState extends State<LoginPage> {
                 const SizedBox(height: 20),
 
                 // Password
-                NextStepTextField(
+                NexStepTextField(
                   hintText: 'Password',
                   prefixIcon: Icons.lock_outline,
                   obscureText: _obscurePassword,
@@ -73,11 +73,10 @@ class _LoginPageState extends State<LoginPage> {
                   child: NexStepButton(
                     text: 'Get Started',
                     onPressed: () {
-                      Navigator.push(
+                      Navigator.pushNamedAndRemoveUntil(
                         context,
-                        MaterialPageRoute(
-                          builder: (context) => const LoginPage(),
-                        ),
+                        '/dashboard',
+                        (Route<dynamic> route) => false,
                       );
                     },
                   ),

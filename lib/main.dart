@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nexstep/pages/dashboard_page.dart';
 import 'package:nexstep/pages/login_page.dart';
 import 'package:nexstep/pages/signup_page.dart';
 import 'package:nexstep/pages/target_info_page.dart';
@@ -24,6 +25,7 @@ class MyApp extends StatelessWidget {
         '/login': (context) => const LoginPage(),
         '/signup': (context) => const SignupPage(),
         '/target-info': (context) => const TargetInfoPage(),
+        '/dashboard': (context) => const DashboardPage(),
       },
     );
   }

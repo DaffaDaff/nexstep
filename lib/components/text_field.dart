@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:nexstep/theme/main_theme.dart';
 
-class NextStepTextField extends StatelessWidget {
+class NexStepTextField extends StatelessWidget {
   final String hintText;
   final IconData prefixIcon;
   final bool obscureText;
@@ -9,7 +9,7 @@ class NextStepTextField extends StatelessWidget {
   final TextInputType keyboardType;
   final Widget? suffixIcon;
 
-  const NextStepTextField({
+  const NexStepTextField({
     super.key,
     required this.hintText,
     required this.prefixIcon,

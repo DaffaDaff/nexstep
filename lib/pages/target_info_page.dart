@@ -46,7 +46,7 @@ class _TargetInfoPageState extends State<TargetInfoPage> {
                 const SizedBox(height: 40),
 
                 // Age
-                NextStepTextField(
+                NexStepTextField(
                   hintText: 'Age',
                   prefixIcon: Icons.cake_outlined,
                   keyboardType: TextInputType.number,
@@ -67,7 +67,7 @@ class _TargetInfoPageState extends State<TargetInfoPage> {
                 Row(
                   children: [
                     Expanded(
-                      child: NextStepTextField(
+                      child: NexStepTextField(
                         hintText: 'Weight',
                         prefixIcon: Icons.monitor_weight_outlined,
                         keyboardType: TextInputType.number,
@@ -76,7 +76,7 @@ class _TargetInfoPageState extends State<TargetInfoPage> {
                     ),
                     const SizedBox(width: 10),
                     Expanded(
-                      child: NextStepTextField(
+                      child: NexStepTextField(
                         hintText: 'Target Weight',
                         prefixIcon: Icons.flag_outlined,
                         keyboardType: TextInputType.number,
@@ -91,7 +91,7 @@ class _TargetInfoPageState extends State<TargetInfoPage> {
                 Row(
                   children: [
                     Expanded(
-                      child: NextStepTextField(
+                      child: NexStepTextField(
                         hintText: 'Height',
                         prefixIcon: Icons.height_outlined,
                         keyboardType: TextInputType.number,
@@ -100,7 +100,7 @@ class _TargetInfoPageState extends State<TargetInfoPage> {
                     ),
                     const SizedBox(width: 10),
                     Expanded(
-                      child: NextStepTextField(
+                      child: NexStepTextField(
                         hintText: 'Target Height',
                         prefixIcon: Icons.flag_circle_outlined,
                         keyboardType: TextInputType.number,
@@ -125,7 +125,11 @@ class _TargetInfoPageState extends State<TargetInfoPage> {
                 NexStepButton(
                   text: 'Signup',
                   onPressed: () {
-                    Navigator.popUntil(context, ModalRoute.withName('/login'));
+                    Navigator.pushNamedAndRemoveUntil(
+                      context,
+                      '/dashboard',
+                      (Route<dynamic> route) => false,
+                    );
                   },
                 ),
               ],
