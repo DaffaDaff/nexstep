@@ -1,159 +1,300 @@
 import 'package:flutter/material.dart';
-import 'package:sensors_plus/sensors_plus.dart';
-import 'package:geolocator/geolocator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-class SensorsPage extends StatefulWidget {
-  const SensorsPage({super.key});
+class ProfilePage extends StatefulWidget {
+  const ProfilePage({super.key});
 
   @override
-  State<SensorsPage> createState() => _SensorsPageState();
+  _ProfilePageState createState() => _ProfilePageState();
 }
 
-class _SensorsPageState extends State<SensorsPage> {
-  // Accelerometer
-  double ax = 0, ay = 0, az = 0;
-
-  // Gyroscope
-  double gx = 0, gy = 0, gz = 0;
-
-  // GPS
-  double? latitude;
-  double? longitude;
-  bool _gettingLocation = false;
+class _ProfilePageState extends State<ProfilePage> {
+  User? profileData;
+  List<Map<String, dynamic>>? goalsData;
+  bool isLoading = true;
+  String? errorMessage;
 
   @override
   void initState() {
     super.initState();
-
-    // Accelerometer stream
-    accelerometerEvents.listen((AccelerometerEvent event) {
-      setState(() {
-        ax = event.x;
-        ay = event.y;
-        az = event.z;
-      });
-    });
-
-    // Gyroscope stream
-    gyroscopeEvents.listen((GyroscopeEvent event) {
-      setState(() {
-        gx = event.x;
-        gy = event.y;
-        gz = event.z;
-      });
-    });
-
-    _getLocation();
+    _fetchProfileData();
+    // _fetchGoalsData();
   }
 
-  Future<void> _getLocation() async {
-    setState(() => _gettingLocation = true);
+  Future<void> _fetchProfileData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getString('user_id');
 
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      await Geolocator.openLocationSettings();
-      return;
+    final response = await Supabase.instance.client
+        .from('details') // Replace with your actual table name
+        .select()
+        .eq('user_id', userId!) // Optional: to filter by user_id
+        .single(); // Assuming only one record per user
+
+    debugPrint(response.toString());
+
+    // Ensure that the response is properly checked
+    if (response['id'] != null) {
+      setState(() {
+        profileData = Supabase
+            .instance
+            .client
+            .auth
+            .currentUser; // This is the data returned by the query
+        isLoading = false;
+      });
+    } else {
+      // setState(() {
+      //   errorMessage =
+      //       response.error?.message ??
+      //       "An error occurred while fetching profile data.";
+      //   isLoading = false;
+      // });
     }
-
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) return;
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      return;
-    }
-
-    Position position = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
-    );
-
-    setState(() {
-      latitude = position.latitude;
-      longitude = position.longitude;
-      _gettingLocation = false;
-    });
   }
+
+  // Future<void> _fetchGoalsData() async {
+  //   final response = await Supabase.instance.client
+  //       .from('goals') // Replace with your actual table name
+  //       .select()
+  //       .eq('user_id', 'your-user-id') // Optional: to filter by user_id
+  //       .order(
+  //         'created_at',
+  //       ); // Assuming your goals table has a 'created_at' column
+
+  //   // Ensure that the response is properly checked
+  //   if (response.error == null) {
+  //     setState(() {
+  //       goalsData = List<Map<String, dynamic>>.from(
+  //         response.data ?? [],
+  //       ); // Converting to List<Map<String, dynamic>>
+  //     });
+  //   } else {
+  //     setState(() {
+  //       errorMessage =
+  //           response.error?.message ??
+  //           "An error occurred while fetching goals data.";
+  //     });
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Profile')),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (errorMessage != null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Profile')),
+        body: Center(
+          child: Text(errorMessage!, style: const TextStyle(color: Colors.red)),
+        ),
+      );
+    }
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Sensors Dashboard'),
-        backgroundColor: Colors.blueAccent,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: ListView(
-          children: [
-            _buildCard(
-              title: 'Accelerometer',
-              subtitle: 'Measures acceleration (m/s²)',
-              values: [
-                'X: ${ax.toStringAsFixed(2)}',
-                'Y: ${ay.toStringAsFixed(2)}',
-                'Z: ${az.toStringAsFixed(2)}',
-              ],
-            ),
-            _buildCard(
-              title: 'Gyroscope',
-              subtitle: 'Measures rotation (rad/s)',
-              values: [
-                'X: ${gx.toStringAsFixed(2)}',
-                'Y: ${gy.toStringAsFixed(2)}',
-                'Z: ${gz.toStringAsFixed(2)}',
-              ],
-            ),
-            _buildCard(
-              title: 'GPS Location',
-              subtitle: 'Current coordinates',
-              values: [
-                if (latitude != null && longitude != null)
-                  'Lat: ${latitude!.toStringAsFixed(6)}\nLon: ${longitude!.toStringAsFixed(6)}'
-                else if (_gettingLocation)
-                  'Getting location...'
-                else
-                  'Tap below to refresh',
-              ],
-              button: ElevatedButton(
-                onPressed: _getLocation,
-                child: const Text('Refresh Location'),
+      backgroundColor: const Color(0xFF0F141A),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Profile Section
+              Row(
+                children: [
+                  CircleAvatar(
+                    radius: 35,
+                    backgroundColor: Colors.grey.shade700,
+                    child: Text(
+                      profileData?.email?.substring(0, 1) ??
+                          "U", // Default if no data
+                      style: const TextStyle(fontSize: 32, color: Colors.white),
+                    ),
+                  ),
+                  const SizedBox(width: 15),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        profileData?.userMetadata?['username'] ??
+                            "User", // Default name if no data
+                        style: const TextStyle(
+                          fontSize: 20,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        profileData?.email ?? "user@nexstep.com",
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey.shade400,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      // Container(
+                      //   padding: const EdgeInsets.symmetric(
+                      //     horizontal: 16,
+                      //     vertical: 6,
+                      //   ),
+                      //   decoration: BoxDecoration(
+                      //     color: const Color(0xFF0EA5E9),
+                      //     borderRadius: BorderRadius.circular(20),
+                      //   ),
+                      //   child: const Text(
+                      //     "Edit Profile",
+                      //     style: TextStyle(color: Colors.white),
+                      //   ),
+                      // ),
+                    ],
+                  ),
+                ],
               ),
-            ),
-          ],
+
+              const SizedBox(height: 30),
+
+              // Body Composition Summary (e.g., weight, height)
+              Text(
+                "Body Composition Summary",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                ),
+              ),
+              const SizedBox(height: 15),
+
+              Container(
+                padding: const EdgeInsets.all(18),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: Colors.blueGrey.shade700),
+                ),
+                child: Column(
+                  children: [
+                    // _bodyRow(
+                    //   icon: Icons.monitor_weight,
+                    //   label: "Weight",
+                    //   value: profileData?['weight']?.toString() ?? "72 kg",
+                    //   diff: "-0.2 kg",
+                    //   diffColor: Colors.greenAccent,
+                    // ),
+                    // const Divider(color: Colors.grey),
+                    // _bodyRow(
+                    //   icon: Icons.height,
+                    //   label: "Height",
+                    //   value: profileData?['height']?.toString() ?? "175 cm",
+                    //   diff: "+1 cm",
+                    //   diffColor: Colors.greenAccent,
+                    // ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 30),
+
+              // // Weekly Goals
+              // Text(
+              //   "Weekly Goals",
+              //   style: TextStyle(
+              //     color: Colors.white,
+              //     fontWeight: FontWeight.w600,
+              //     fontSize: 16,
+              //   ),
+              // ),
+              // const SizedBox(height: 15),
+
+              // // Display goals dynamically
+              // if (goalsData != null && goalsData!.isNotEmpty)
+              //   for (var goal in goalsData!)
+              //     _goalCard(
+              //       icon: Icons.check,
+              //       label: goal['goal_name'] ?? 'Goal',
+              //       progress:
+              //           '${goal['completed_count'] ?? 0}/${goal['total_count'] ?? 0}',
+              //     ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildCard({
-    required String title,
-    required String subtitle,
-    required List<String> values,
-    Widget? button,
+  Widget _bodyRow({
+    required IconData icon,
+    required String label,
+    required String value,
+    required String diff,
+    required Color diffColor,
   }) {
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      elevation: 4,
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Row(
           children: [
-            Text(
-              title,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            Icon(icon, color: Colors.greenAccent),
+            const SizedBox(width: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label, style: TextStyle(color: Colors.grey, fontSize: 13)),
+                Text(
+                  value,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 4),
-            Text(subtitle, style: const TextStyle(color: Colors.grey)),
-            const Divider(height: 16),
-            for (var value in values)
-              Text(value, style: const TextStyle(fontSize: 16)),
-            if (button != null) ...[const SizedBox(height: 12), button],
           ],
         ),
+        Text(
+          diff,
+          style: TextStyle(
+            color: diffColor,
+            fontWeight: FontWeight.w600,
+            fontSize: 14,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _goalCard({
+    required IconData icon,
+    required String label,
+    required String progress,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.blueGrey.shade700),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.orangeAccent, size: 32),
+          const SizedBox(width: 20),
+          Expanded(
+            child: Text(
+              label,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          Text(progress, style: TextStyle(color: Colors.white, fontSize: 16)),
+        ],
       ),
     );
   }

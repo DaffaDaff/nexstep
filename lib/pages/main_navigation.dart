@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nexstep/pages/chatbot_page.dart';
 import 'package:nexstep/pages/dashboard_page.dart';
 import 'package:nexstep/pages/profile_page.dart';
 import 'package:nexstep/pages/training_plans_page.dart';
@@ -17,7 +18,7 @@ class _MainNavigationState extends State<MainNavigation> {
   final List<Widget> _pages = const [
     DashboardPage(),
     TrainingPlansPage(),
-    SensorsPage(),
+    ProfilePage(),
   ];
 
   void _onNavTapped(int index) {

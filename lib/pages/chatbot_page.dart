@@ -1,12 +1,17 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:openrouter_api/openrouter_api.dart';
 import 'package:openrouter_api/src/models/llm_response.dart';
 import 'package:openrouter_api/src/enums/message_role.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ChatbotPage extends StatefulWidget {
-  const ChatbotPage({super.key});
+  final String workoutId;
+
+  const ChatbotPage({super.key, required this.workoutId});
 
   @override
   _ChatbotPageState createState() => _ChatbotPageState();
@@ -14,22 +19,54 @@ class ChatbotPage extends StatefulWidget {
 
 class _ChatbotPageState extends State<ChatbotPage> {
   final TextEditingController _controller = TextEditingController();
+
+  String chatId = '';
   final List<LlmMessage> messages = [];
   LlmMessage _getMessage = LlmMessage.assistant('');
   late ChatService _chatService;
   late StreamSubscription<LlmResponse> _responseSubscription;
   final FocusNode _focusNode = FocusNode();
 
+  bool _isLoading = true;
+
   @override
   void initState() {
     super.initState();
     _chatService = ChatService();
-    messages.add(
-      LlmMessage.system(
-        'You are a helpful fitness coach, specifically track & field.',
-      ),
-    );
-    messages.add(LlmMessage.assistant('Hello, How can I help you today?'));
+    _fetchChatData();
+  }
+
+  // Function to fetch workout data from Supabase
+  Future<void> _fetchChatData() async {
+    final response = await Supabase.instance.client
+        .from('chat_sessions')
+        .select()
+        .eq('workout_id', widget.workoutId);
+
+    if (response.isNotEmpty) {
+      // Assuming the first row contains the user's current workout data
+      setState(() {
+        chatId = response.single['id'];
+
+        List<LlmMessage> fetchedMessages = decodeData(
+          response.single['messages'],
+        );
+        messages.clear(); // Clear previous messages
+        messages.addAll(fetchedMessages);
+      });
+    } else {
+      _insertNewChatSession();
+      setState(() {
+        messages.add(
+          LlmMessage.system(
+            'You are a helpful fitness coach, specifically track & field.',
+          ),
+        );
+        messages.add(LlmMessage.assistant('Hello, How can I help you today?'));
+        _updateChatSession(messages);
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -67,10 +104,55 @@ class _ChatbotPageState extends State<ChatbotPage> {
       },
       onError: (error) {},
       onDone: () {
-        messages.add(_getMessage);
-        _getMessage = LlmMessage.assistant('');
+        setState(() {
+          messages.add(_getMessage);
+          _updateChatSession(messages);
+
+          _getMessage = LlmMessage.assistant('');
+        });
       },
     );
+  }
+
+  Future<void> _insertNewChatSession() async {
+    final newSession = {
+      'workout_id': widget.workoutId,
+      'messages': {'data': []},
+    };
+
+    final PostgrestList response = await Supabase.instance.client
+        .from('chat_sessions')
+        .insert(newSession)
+        .select();
+
+    if (response.isNotEmpty) {
+      setState(() {
+        _isLoading = false;
+      });
+    } else {
+      // Handle error
+      // debugPrint(
+      //   'Error inserting new chat session: ${response.error?.message}',
+      // );
+    }
+  }
+
+  Future<void> _updateChatSession(List<LlmMessage> updatedMessages) async {
+    final Map<String, dynamic> updatedSession = encodeData(updatedMessages);
+
+    final response = await Supabase.instance.client
+        .from('chat_sessions')
+        .update({'messages': updatedSession})
+        .eq('workout_id', widget.workoutId)
+        .select();
+
+    if (response.isNotEmpty) {
+      debugPrint('Chat session updated successfully.');
+    } else {
+      debugPrint(
+        'Error updating chat session: ${response.toList().toString()}',
+      );
+    }
   }
 
   @override
@@ -120,13 +202,13 @@ class _ChatbotPageState extends State<ChatbotPage> {
 class ChatService {
   final client = OpenRouter.inference(
     key:
-        "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", // Remember to securely manage your API key
+        "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",
   );
 
   Stream<LlmResponse> getChatbotResponseStream(List<LlmMessage> messages) {
     try {
       final Stream<LlmResponse> responseStream = client.streamCompletion(
-        modelId: "qwen/qwen2.5-vl-32b-instruct",
+        modelId: "openai/gpt-3.5-turbo",
         messages: messages,
       );
 
@@ -176,4 +258,38 @@ class MessageBubble extends StatelessWidget {
       ),
     );
   }
+}
+
+Map<String, dynamic> encodeData(List<LlmMessage> data) {
+  List<Map<String, dynamic>> messages = data.map((message) {
+    return {
+      'role': message.role.toString().split('.').last,
+      'content': message.messageContent.text,
+    };
+  }).toList();
+
+  return {'data': messages};
+}
+
+List<LlmMessage> decodeData(Map<String, dynamic> data) {
+  List<LlmMessage> messages = data['data'].map<LlmMessage>((message) {
+    // Extract role and content from the map
+    String roleStr = message['role'];
+    String content = message['content'];
+
+    switch (roleStr) {
+      case 'user':
+        return LlmMessage.user(LlmMessageContent.text(content));
+
+      case 'assistant':
+        return LlmMessage.assistant(content);
+
+      case 'system':
+        return LlmMessage.system(content);
+      default:
+        return LlmMessage.user(LlmMessageContent.text(content));
+    }
+  }).toList();
+
+  return messages;
 }
