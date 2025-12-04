@@ -44,7 +44,7 @@ class _MainNavigationState extends State<MainNavigation> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.fitness_center_outlined),
-            label: 'Training Plans',
+            label: 'My Workouts',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),

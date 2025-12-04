@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:nexstep/pages/chatbot_page.dart';
+import 'package:nexstep/pages/create_workout_page.dart';
 import 'package:nexstep/pages/dashboard_page.dart';
 import 'package:nexstep/pages/login_page.dart';
 import 'package:nexstep/pages/main_navigation.dart';
@@ -30,7 +31,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'NexStep',
       theme: MainTheme.darkTheme,
-      initialRoute: '/main-nav',
+      initialRoute: '/welcome',
       routes: {
         '/welcome': (context) => const WelcomePage(),
         '/login': (context) => const LoginPage(),
@@ -52,8 +53,22 @@ class MyApp extends StatelessWidget {
 
           return ChatbotPage(workoutId: workoutId);
         },
-        '/tracker': (context) => TrackerPage(),
+        '/tracker': (context) {
+          final args = ModalRoute.of(context)?.settings.arguments as Map?;
+          final workoutId = args?['workout_id'] ?? '';
+
+          return TrackerPage(workoutId: workoutId);
+        },
+        '/create': (context) {
+          return CreateWorkoutPage();
+        },
       },
     );
+  }
+}
+
+extension StringExtensions on String {
+  String capitalize() {
+    return "${this[0].toUpperCase()}${this.substring(1)}";
   }
 }

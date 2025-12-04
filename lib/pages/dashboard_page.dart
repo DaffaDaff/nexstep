@@ -123,101 +123,13 @@ class _DashboardPageState extends State<DashboardPage> {
                 NexStepButton(
                   text: "Start Workout",
                   onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Workout started!")),
-                    );
+                    Navigator.pushNamed(context, '/create');
                   },
                 ),
                 const SizedBox(height: 30),
-
-                // Loading State
-                _isLoading
-                    ? Center(child: CircularProgressIndicator())
-                    : ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: _activities.length,
-                        itemBuilder: (context, index) {
-                          final activity = _activities[index];
-                          return _buildActivityCard(
-                            title: activity['type'] ?? 'No Title',
-                            subtitle:
-                                '${activity['target']['distance'] ?? '0'} km',
-                            detail: activity['detail'] ?? 'No Detail',
-                            icon: Icons.directions_run,
-                            onTap: () {
-                              Navigator.pushNamed(
-                                context,
-                                '/workout',
-                                arguments: activity,
-                              );
-                            },
-                          );
-                        },
-                      ),
               ],
             ),
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildActivityCard({
-    required String title,
-    required String subtitle,
-    required String detail,
-    required IconData icon,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(color: MainTheme.primaryColor.withOpacity(0.4)),
-          borderRadius: BorderRadius.circular(16),
-          color: const Color(0xFF1C1C1C),
-        ),
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                color: MainTheme.primaryColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              padding: const EdgeInsets.all(10),
-              child: Icon(icon, color: MainTheme.primaryColor, size: 28),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                      fontSize: 16,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    style: const TextStyle(color: Colors.white70, fontSize: 13),
-                  ),
-                  Text(
-                    detail,
-                    style: TextStyle(
-                      color: MainTheme.primaryColor,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
         ),
       ),
     );

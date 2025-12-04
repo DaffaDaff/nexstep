@@ -59,10 +59,14 @@ class _ChatbotPageState extends State<ChatbotPage> {
       setState(() {
         messages.add(
           LlmMessage.system(
-            'You are a helpful fitness coach, specifically track & field.',
+            'You are a helpful fitness coach, specifically track & field. Reject anything that is not related to said topic.',
           ),
         );
-        messages.add(LlmMessage.assistant('Hello, How can I help you today?'));
+        messages.add(
+          LlmMessage.assistant(
+            'Hello, I am your personal AI couch. How can I help you today?',
+          ),
+        );
         _updateChatSession(messages);
         _isLoading = false;
       });
@@ -202,7 +206,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
 class ChatService {
   final client = OpenRouter.inference(
     key:
-        "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",
+        "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",
   );
 
   Stream<LlmResponse> getChatbotResponseStream(List<LlmMessage> messages) {

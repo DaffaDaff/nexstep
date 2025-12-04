@@ -13,6 +13,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
   Map<String, dynamic> target = {};
   Map<String, dynamic> progress = {};
   Map<String, dynamic> tracker = {};
+  bool isFinished = false;
   bool _isLoading = true;
 
   @override
@@ -29,6 +30,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
         target = widget.token['target'] ?? {};
         progress = widget.token['progress'] ?? {};
         tracker = widget.token['tracker'] ?? {};
+        isFinished = widget.token['is_finished'] ?? false;
         _isLoading = false;
       });
     } else {
@@ -67,7 +69,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
                   Icon(Icons.directions_run, color: Colors.blue),
                   SizedBox(width: 10),
                   Text(
-                    'Target Distance: ${target['distance']} km',
+                    'Target Distance: ${target['distance']} meter',
                     style: TextStyle(fontSize: 16),
                   ),
                 ],
@@ -83,7 +85,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
                   Icon(Icons.directions_run, color: Colors.red),
                   SizedBox(width: 10),
                   Text(
-                    'Distance Progress: ${progress['distance']} km',
+                    'Distance Progress: ${progress['distance'].toInt()} meter',
                     style: TextStyle(fontSize: 16),
                   ),
                 ],
@@ -110,7 +112,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
                   Icon(Icons.directions_run, color: Colors.lightGreen),
                   SizedBox(width: 10),
                   Text(
-                    'Average Cadance: ${progress['cadence ']} spm',
+                    'Average Cadance: ${tracker['cadence']} spm',
                     style: TextStyle(fontSize: 16),
                   ),
                 ],
@@ -124,31 +126,45 @@ class _WorkoutPageState extends State<WorkoutPage> {
               ),
               SizedBox(height: 10),
               LinearProgressIndicator(
-                value: progress['distance'] / target['distance'],
+                value: progress['distance'].toInt() / target['distance'],
                 backgroundColor: Colors.grey[300],
                 color: Colors.blue,
                 minHeight: 10,
               ),
               SizedBox(height: 20),
 
-              Center(
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/tracker');
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    padding: EdgeInsets.symmetric(horizontal: 60, vertical: 15),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
+              isFinished
+                  ? Container()
+                  : Center(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.pushNamed(
+                            context,
+                            '/tracker',
+                            arguments: {'workout_id': widget.token['id']},
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 60,
+                            vertical: 15,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
+                        child: Text(
+                          'Start Workout',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                  child: Text(
-                    'Start Workout',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ),
+
+              SizedBox(height: 20),
 
               Center(
                 child: ElevatedButton(

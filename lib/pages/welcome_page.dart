@@ -1,9 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:nexstep/components/button.dart';
 import 'package:nexstep/theme/main_theme.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class WelcomePage extends StatelessWidget {
+class WelcomePage extends StatefulWidget {
   const WelcomePage({super.key});
+
+  @override
+  State<WelcomePage> createState() => _WelcomePageState();
+}
+
+class _WelcomePageState extends State<WelcomePage> {
+  @override
+  void initState() {
+    super.initState();
+    _fetchLoginSession();
+  }
+
+  Future<void> _fetchLoginSession() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (prefs.getString('user_id') != null &&
+        prefs.getString('user_id') != '') {
+      Navigator.pushNamed(context, '/main-nav');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
